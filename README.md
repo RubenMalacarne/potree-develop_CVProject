@@ -19,7 +19,7 @@ Step two:
 	
 	- salvare in un file JSON i dati voluti 
 				+ Annotation (description, link of image)		[ ]
-				+ Position annotation						[ ]
+				+ Position annotation				[ ]
 				+ Value of quternion of each annotation			[ ]
 
 Step Three:
@@ -27,12 +27,6 @@ Step Three:
 	- Use the anchoring algorithm to overlay the data 
 	from the JSON file onto the preferred image					[ ]
 	
-
-
-
-
-
-
 # Getting Started
 
 ### Install on your PC
