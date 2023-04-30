@@ -10,19 +10,19 @@ In this git, you will find the project regarding the Computer Vision course, whe
     
 # To DO:
 
-* Step one:
+Step one:
 	
 	- Open file after converted .Ply in .Las							[x]
 	- Add annotations like image										[x]
 
-* Step two:
+Step two:
 	
 	- salvare in un file JSON i dati voluti 
 				Annotation (description, link of image)					[ ]
 				Position annotation										[ ]
 				Value of quternion of each annotation					[ ]
 
-*	Step Three:
+Step Three:
 	
 	- Use the anchoring algorithm to overlay the data from the JSON file onto the preferred image		[ ]
 	
