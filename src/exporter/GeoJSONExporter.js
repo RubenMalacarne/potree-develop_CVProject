@@ -110,4 +110,32 @@ export class GeoJSONExporter{
 		return JSON.stringify(geojson, null, '\t');
 	}
 
+	static getAnnotation(annotation, scene){
+		let features = [];
+
+		for(let i=0; i<annotation.length; i++){
+			let feature = {
+				type: 'Feature',
+				geometry: {
+					type: 'Annotation',
+					coordinates: annotation[i].position.toArray()
+				},
+				properties: {
+					title: annotation[i].title,
+					description: annotation[i].description,
+					src: annotation[i].src
+				}
+			};
+			features.push(feature);
+		}
+
+		let geojson = {
+			'type': 'FeatureCollection',
+			'quaternion': scene.getActiveCamera().quaternion.toArray(),
+			'features': features
+		};
+
+		return JSON.stringify(geojson, null, '\t');
+	}
+
 }

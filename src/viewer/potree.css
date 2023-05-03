@@ -301,6 +301,64 @@ a:hover, a:visited, a:link, a:active{
 	color:			white;
 }
 
+.annotation-description-content-image{
+	width:			500px;
+}
+
+.annotation-adder{
+	position:		relative;
+	color:			white;
+	background-color:	black;
+	display:		none;
+}
+
+.annotation-adder div{
+	width: 200px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.annotation-adder-button{
+	display: inline-block;
+	border-radius: 4px;
+	background-color: #f4511e;
+	border: none;
+	color: #FFFFFF;
+	text-align: center;
+	font-size: 14px;
+	padding: 8px;
+	width: 100px;
+	transition: all 0.5s;
+	cursor: pointer;
+	margin: 5px;
+}
+
+.annotation-adder-button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.annotation-adder-button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.annotation-adder-button:hover span {
+  padding-right: 15px;
+}
+
+.annotation-adder-button:hover span:after{
+	opacity: 1;
+  	right: 0;
+}
+
 .annotation-icon{
 	width:		20px;
 	height:		20px;
@@ -308,7 +366,6 @@ a:hover, a:visited, a:link, a:active{
 	margin:		2px 2px;
 	opacity:	0.5;
 }
-
 
 canvas { 
 	width: 100%; 

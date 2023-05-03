@@ -13,6 +13,7 @@ export class Scene extends EventDispatcher{
 		super();
 
 		this.annotations = new Annotation();
+		this.annotationList = [];
 		
 		this.scene = new THREE.Scene();
 		this.sceneBG = new THREE.Scene();
@@ -270,6 +271,7 @@ export class Scene extends EventDispatcher{
 	addMeasurement(measurement){
 		measurement.lengthUnit = this.lengthUnit;
 		measurement.lengthUnitDisplay = this.lengthUnitDisplay;
+		console.log(measurement);
 		this.measurements.push(measurement);
 		this.dispatchEvent({
 			'type': 'measurement_added',
@@ -414,7 +416,12 @@ export class Scene extends EventDispatcher{
 		// 	}
 		// }
 	}
+
+	addAnnotation(annotation){
+		this.annotationList.push(annotation);
+	}
 	
+	/*
 	addAnnotation(position, args = {}){		
 		if(position instanceof Array){
 			args.position = new THREE.Vector3().fromArray(position);
@@ -422,10 +429,11 @@ export class Scene extends EventDispatcher{
 			args.position = position;
 		}
 		let annotation = new Annotation(args);
+		console.log(annotation);
 		this.annotations.add(annotation);
 
 		return annotation;
-	}
+	}*/
 
 	getAnnotations () {
 		return this.annotations;

@@ -313,12 +313,13 @@ export class Sidebar{
 				<a href="#" download="measure.json"><img name="geojson_export_button" src="${geoJSONIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="measure.dxf"><img name="dxf_export_button" src="${dxfIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="potree.json5"><img name="potree_export_button" src="${potreeIcon}" class="button-icon" style="height: 24px" /></a>
+				<a href="#" download="annotation.json"><img name="note_export_button" src="${geoJSONIcon}" class="button-icon" style="height: 24px" /></a>
 			`);
 
 			let elDownloadJSON = elExport.find("img[name=geojson_export_button]").parent();
 			elDownloadJSON.click( (event) => {
 				let scene = this.viewer.scene;
-				let measurements = [...scene.measurements, ...scene.profiles, ...scene.volumes];
+				let measurements = [...scene.measurements, ...scene.profiles, ...scene.volumes, ...scene.testAnnotations];
 
 				if(measurements.length > 0){
 					let geoJson = GeoJSONExporter.toString(measurements);
@@ -327,6 +328,22 @@ export class Sidebar{
 					elDownloadJSON.attr('href', url);
 				}else{
 					this.viewer.postError("no measurements to export");
+					event.preventDefault();
+				}
+			});
+
+			let elDownloadNoteJSON = elExport.find("img[name=note_export_button]").parent();
+			elDownloadNoteJSON.click( (event) => {
+				let scene = this.viewer.scene;
+				let annotation = [...scene.annotationList];
+
+				if(annotation.length > 0){
+					let geoJson = GeoJSONExporter.getAnnotation(annotation, scene);
+
+					let url = window.URL.createObjectURL(new Blob([geoJson], {type: 'data:application/octet-stream'}));
+					elDownloadNoteJSON.attr('href', url);
+				}else{
+					this.viewer.postError("no annotation to export");
 					event.preventDefault();
 				}
 			});

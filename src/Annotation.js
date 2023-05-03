@@ -15,6 +15,9 @@ export class Annotation extends EventDispatcher {
 		this.offset = new THREE.Vector3();
 		this.uuid = THREE.Math.generateUUID();
 
+		this._image = args.image || '';
+		this.src = '';
+
 		if (!args.position) {
 			this.position = null;
 		} else if (args.position.x != null) {
@@ -56,6 +59,13 @@ export class Annotation extends EventDispatcher {
 						<img src="${iconClose}" width="16px">
 					</span>
 					<span class="annotation-description-content">${this._description}</span>
+					<img src="${this._image}" id="DescImage" class="annotation-description-content-image">
+				</div>
+				<div class="annotation-adder">
+					<div>
+				 		<!-- <label for="imageInput"" class="annotation-adder-button"><span>Select Image</span></label> -->
+						<input id="imageInput" type="file" name="DescriptionImageInput" class="annotation-image-input" accept="image/png, image/jpeg, image/gif">
+					</div>
 				</div>
 			</div>
 		`);
@@ -65,13 +75,25 @@ export class Annotation extends EventDispatcher {
 		this.elTitle.append(this._title);
 		this.elDescription = this.domElement.find('.annotation-description');
 		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
+		this.elDescriptionImage = this.elDescription.find('.annotation-description-content-image');
 		// this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
 
+		this.elAdder = this.domElement.find('.annotation-adder');
+		this.elImageInput = this.elAdder.find('.annotation-image-input');
+
 		this.clickTitle = () => {
+			let camera = this.scene.getActiveCamera();
+			console.log(camera.quaternion);
+			/*
 			if(this.hasView()){
 				this.moveHere(this.scene.getActiveCamera());
-			}
+			}*/
 			this.dispatchEvent({type: 'click', target: this});
+			this.elDescriptionClose.css('opacity', '1');
+			if(this.descriptionVisible)
+				this.setHighlighted(false);
+			else
+				this.setHighlighted(true);
 		};
 
 		this.elTitle.click(this.clickTitle);
@@ -104,8 +126,9 @@ export class Annotation extends EventDispatcher {
 		this.elDescriptionClose.click(e => this.setHighlighted(false));
 		// this.elDescriptionContent.html(this._description);
 
+		/*
 		this.domElement.mouseenter(e => this.setHighlighted(true));
-		this.domElement.mouseleave(e => this.setHighlighted(false));
+		this.domElement.mouseleave(e => this.setHighlighted(false));*/
 
 		this.domElement.on('touchstart', e => {
 			this.setHighlighted(!this.isHighlighted);
@@ -114,6 +137,35 @@ export class Annotation extends EventDispatcher {
 		this.display = false;
 		//this.display = true;
 
+		// Handle Image Input
+		this.changeImage = (e) => {
+			//this.dispatchEvent({type: 'change', target: this});
+			var files = e.target.files;
+			var descImg = this.elDescriptionImage;
+
+			if(FileReader && files && files.length) {
+				var fr = new FileReader();
+				
+				var self = this;
+				fr.onload = function () {
+					//document.getElementById("DescImage").src = fr.result;
+					//console.log(typeof this.elDescriptionImage);
+					//console.log(this.elDescriptionImage.html);
+					self.elDescriptionImage.attr('src', fr.result);
+					//this.elTitle = this.elContent.find("#annotation_title").html(annotation.title);
+				}
+				fr.readAsDataURL(files[0]);
+				//this.elDescriptionImage.attr('src', fr.result);
+			} else {
+				// fallback -- perhaps submit the input to an iframe and temporarily store
+				// them on the server until the user's session ends.
+				console.log("FileReader error");
+			}
+
+			//this.elDescriptionImage.attr('src', '80');
+		};
+
+		this.elImageInput.change(this.changeImage);
 	}
 
 	installHandles(viewer){
@@ -490,6 +542,8 @@ export class Annotation extends EventDispatcher {
 				this.descriptionVisible = true;
 				this.elDescription.fadeIn(200);
 				this.elDescription.css('position', 'relative');
+				this.elAdder.fadeIn(200);
+				this.elAdder.css('position', 'relative');
 			}
 		} else {
 			this.domElement.css('opacity', '0.5');
@@ -497,6 +551,7 @@ export class Annotation extends EventDispatcher {
 			this.domElement.css('z-index', '100');
 			this.descriptionVisible = false;
 			this.elDescription.css('display', 'none');
+			this.elAdder.css('display', 'none');
 		}
 
 		this.isHighlighted = highlighted;

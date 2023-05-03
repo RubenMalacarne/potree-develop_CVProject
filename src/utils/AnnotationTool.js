@@ -23,7 +23,8 @@ export class AnnotationTool extends EventDispatcher{
 		let annotation = new Annotation({
 			position: [589748.270, 231444.540, 753.675],
 			title: "Annotation Title",
-			description: `Annotation Description`
+			description: `Annotation Description`,
+			image: ''
 		});
 		this.dispatchEvent({type: 'start_inserting_annotation', annotation: annotation});
 
@@ -81,6 +82,8 @@ export class AnnotationTool extends EventDispatcher{
 
 		this.viewer.scene.scene.add(this.s);
 		this.viewer.inputHandler.startDragging(this.s);
+
+		this.viewer.scene.addAnnotation(annotation);
 
 		return annotation;
 	}
