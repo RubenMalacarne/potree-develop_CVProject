@@ -17,6 +17,8 @@ import {HierarchicalSlider} from "./HierarchicalSlider.js"
 import {OrientedImage} from "../modules/OrientedImages/OrientedImages.js";
 import {Images360} from "../modules/Images360/Images360.js";
 
+
+
 import JSON5 from "../../libs/json5-2.1.3/json5.mjs";
 
 export class Sidebar{
@@ -54,7 +56,6 @@ export class Sidebar{
 		this.initFilters();
 		this.initClippingTool();
 		this.initSettings();
-		
 		$('#potree_version_number').html(Potree.version.major + "." + Potree.version.minor + Potree.version.suffix);
 	}
 
@@ -269,7 +270,37 @@ export class Sidebar{
 				$.jstree.reference(jsonNode.id).select_node(jsonNode.id);
 			}
 		));
+//-------------------------------------------------------------------------------
+		// MESH
+		const input = document.createElement("input");
+		input.type = "file";
+		elToolbar.append(this.createToolIcon(
+			Potree.resourcePath + '/icons/navigation_cube.svg',
+			'[title]mesh',
+			() => {
 
+				this.viewer.postMessage("import Mesh Object");
+				console.log("pulsante mesh premuto")
+				let meshTool = this.viewer.meshTool.startInsertion();
+
+				// // create dynamic element
+				// const el = document.createElement('h1');
+				// const words = "Hello, World!"
+				// const text = document.createTextNode(words);
+				// el.appendChild(text);
+
+				// document.body.appendChild(el);
+				// console.log(document.body)
+				// $('#menu_measurements').next().slideDown(); ;
+				// let mesh = this.viewer.meshTool.startInsertion();
+
+				// let meshsRoot = $("#jstree_scene").jstree().get_json("Meshes");
+				// let jsonNode = meshsRoot.children.find(child => child.data.uuid === mesh.uuid);
+				// $.jstree.reference(jsonNode.id).deselect_all();
+				// $.jstree.reference(jsonNode.id).select_node(jsonNode.id);
+			}
+		));
+//-------------------------------------------------------------------------------
 		// REMOVE ALL
 		elToolbar.append(this.createToolIcon(
 			Potree.resourcePath + '/icons/reset_tools.svg',
@@ -307,30 +338,58 @@ export class Sidebar{
 			let geoJSONIcon = `${Potree.resourcePath}/icons/file_geojson.svg`;
 			let dxfIcon = `${Potree.resourcePath}/icons/file_dxf.svg`;
 			let potreeIcon = `${Potree.resourcePath}/icons/file_potree.svg`;
-
+			let meshUPLOAD = `${Potree.resourcePath}/icons/navigation_cube.svg`;
 			elExport.append(`
 				Export: <br>
 				<a href="#" download="measure.json"><img name="geojson_export_button" src="${geoJSONIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="measure.dxf"><img name="dxf_export_button" src="${dxfIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="potree.json5"><img name="potree_export_button" src="${potreeIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="annotation.json"><img name="note_export_button" src="${geoJSONIcon}" class="button-icon" style="height: 24px" /></a>
+				<a href="#" upload="mesh.stl"><img name="upload_mesh" src="${meshUPLOAD}" class="button-icon" style="height: 24px" /></a>
 			`);
 
-			let elDownloadJSON = elExport.find("img[name=geojson_export_button]").parent();
-			elDownloadJSON.click( (event) => {
+			let ElementDom = $(`
+				<html>
+				<head>
+					<title>Inserisci un'immagine</title>
+				</head>
+				<body>
+					<h1>Inserisci un'immagine</h1>
+					<button onclick="addImage()">Aggiungi immagine</button>
+					<script>
+					function addImage() {
+						var img = document.createElement("img");
+						img.src = "https://example.com/image.jpg";
+						document.body.appendChild(img);
+					}
+					</script>
+				</body>
+				</html>
+
+			`);
+			function addImage() {
+				console.log("add image")
+			}
+
+			let meshUP = elExport.find("img[name=upload_mesh]").parent();
+			meshUP.click( (event) => {
+				this.viewer.postMessage("import Mesh Object");
+				addImage();
+				console.log("pulsante mesh premuto")
 				let scene = this.viewer.scene;
-				let measurements = [...scene.measurements, ...scene.profiles, ...scene.volumes, ...scene.testAnnotations];
-
-				if(measurements.length > 0){
-					let geoJson = GeoJSONExporter.toString(measurements);
-
+				let ann_mesh = [...scene.meshlist];
+				console.log(ann_mesh)
+				if(ann_mesh.length > 0){
+					let geoJson = GeoJSONExporter.getMesh(ann_mesh, scene);
 					let url = window.URL.createObjectURL(new Blob([geoJson], {type: 'data:application/octet-stream'}));
-					elDownloadJSON.attr('href', url);
+					elDownloadNoteJSON.attr('href', url);
 				}else{
-					this.viewer.postError("no measurements to export");
+					this.viewer.postError("no MESH to export");
 					event.preventDefault();
 				}
+				
 			});
+
 
 			let elDownloadNoteJSON = elExport.find("img[name=note_export_button]").parent();
 			elDownloadNoteJSON.click( (event) => {
@@ -347,6 +406,24 @@ export class Sidebar{
 					event.preventDefault();
 				}
 			});
+
+			let elDownloadJSON = elExport.find("img[name=geojson_export_button]").parent();
+			elDownloadJSON.click( (event) => {
+				let scene = this.viewer.scene;
+				let measurements = [...scene.measurements, ...scene.profiles, ...scene.volumes, ...scene.testAnnotations];
+
+				if(measurements.length > 0){
+					let geoJson = GeoJSONExporter.toString(measurements);
+
+					let url = window.URL.createObjectURL(new Blob([geoJson], {type: 'data:application/octet-stream'}));
+					elDownloadJSON.attr('href', url);
+				}else{
+					this.viewer.postError("no measurements to export");
+			event.preventDefault();
+				}
+			});
+
+			
 
 			let elDownloadDXF = elExport.find("img[name=dxf_export_button]").parent();
 			elDownloadDXF.click( (event) => {

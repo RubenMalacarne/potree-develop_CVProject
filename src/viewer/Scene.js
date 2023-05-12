@@ -1,6 +1,7 @@
 
 import * as THREE from "../../libs/three.js/build/three.module.js";
 import {Annotation} from "../Annotation.js";
+import { Mesh } from "../Mesh.js";
 import {CameraMode} from "../defines.js";
 import {View} from "./View.js";
 import {Utils} from "../utils.js";
@@ -11,9 +12,15 @@ export class Scene extends EventDispatcher{
 
 	constructor(){
 		super();
+		//-------------
+		this.annotationList = [];
+		this.meshlist = [];
+		this.mesh = new THREE.Mesh();
+		this.meshes = new Mesh();
+		//-----------
 
 		this.annotations = new Annotation();
-		this.annotationList = [];
+		
 		
 		this.scene = new THREE.Scene();
 		this.sceneBG = new THREE.Scene();
@@ -268,10 +275,17 @@ export class Scene extends EventDispatcher{
 		}
 	};
 	
+	//---------------------------------------------------------------
+	
+	addMesh3d(mesh){
+		this.meshlist.push(mesh);
+	}
+	
+
+	//---------------------------------------------------------------
 	addMeasurement(measurement){
 		measurement.lengthUnit = this.lengthUnit;
 		measurement.lengthUnitDisplay = this.lengthUnitDisplay;
-		console.log(measurement);
 		this.measurements.push(measurement);
 		this.dispatchEvent({
 			'type': 'measurement_added',
@@ -421,6 +435,8 @@ export class Scene extends EventDispatcher{
 		this.annotationList.push(annotation);
 	}
 	
+
+
 	/*
 	addAnnotation(position, args = {}){		
 		if(position instanceof Array){

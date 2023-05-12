@@ -18,6 +18,7 @@ import {Sidebar} from "./sidebar.js";
 
 import {AnnotationTool} from "../utils/AnnotationTool.js";
 import {MeasuringTool} from "../utils/MeasuringTool.js";
+import { MeshTool } from "../utils/MeshTool.js";
 import {ProfileTool} from "../utils/ProfileTool.js";
 import {VolumeTool} from "../utils/VolumeTool.js";
 
@@ -323,6 +324,10 @@ export class Viewer extends EventDispatcher{
 
 		this.annotationTool = new AnnotationTool(this);
 		this.measuringTool = new MeasuringTool(this);
+
+//--------------------------------------------------------------
+		this.meshTool = new MeshTool(this)
+//--------------------------------------------------------------
 		this.profileTool = new ProfileTool(this);
 		this.volumeTool = new VolumeTool(this);
 

@@ -110,20 +110,48 @@ export class GeoJSONExporter{
 		return JSON.stringify(geojson, null, '\t');
 	}
 
-	static getAnnotation(annotation, scene){
+	static getAnnotation(annotations, scene){
 		let features = [];
 
-		for(let i=0; i<annotation.length; i++){
+		for(let i=0; i<annotations.length; i++){
 			let feature = {
 				type: 'Feature',
 				geometry: {
 					type: 'Annotation',
-					coordinates: annotation[i].position.toArray()
+					coordinates: annotations[i].position.toArray()
 				},
 				properties: {
-					title: annotation[i].title,
-					description: annotation[i].description,
-					src: annotation[i].src
+					title: annotations[i].title,
+					description: annotations[i].description,
+					src: annotations[i].src
+				}
+			};
+			features.push(feature);
+		}
+
+		let geojson = {
+			'type': 'FeatureCollection',
+			'quaternion': scene.getActiveCamera().quaternion.toArray(),
+			'features': features
+		};
+
+		return JSON.stringify(geojson, null, '\t');
+	}
+
+	static getMesh(meshes, scene){
+		let features = [];
+
+		for(let i=0; i<mesh.length; i++){
+			let feature = {
+				type: 'Feature',
+				geometry: {
+					type: 'mesh',
+					coordinates: mesh[i].position.toArray()
+				},
+				properties: {
+					title: mesh[i].title,
+					description: mesh[i].description,
+					src: mesh[i].src
 				}
 			};
 			features.push(feature);

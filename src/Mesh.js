@@ -5,7 +5,12 @@ import {Action} from "./Actions.js";
 import {Utils} from "./utils.js";
 import {EventDispatcher} from "./EventDispatcher.js";
 
-export class Annotation extends EventDispatcher {
+
+import {PLYLoader} from "../libs/three.js/loaders/PLYLoader.js";
+import {OBJLoader} from "../libs/three.js/loaders/OBJLoader.js";
+import {STLLoader} from "../libs/three.js/loaders/STLLoader.js";
+
+export class Mesh extends EventDispatcher {
 	constructor (args = {}) {
 		super();
 
@@ -15,7 +20,7 @@ export class Annotation extends EventDispatcher {
 		this.offset = new THREE.Vector3();
 		this.uuid = THREE.Math.generateUUID();
 
-		this._image = args.image || '';
+		this._obj = args.obj || '';
 		this.src = '';
 
 		if (!args.position) {
@@ -48,55 +53,7 @@ export class Annotation extends EventDispatcher {
 		this.boundingBox = new THREE.Box3();
 
 		let iconClose = exports.resourcePath + '/icons/close.svg';
-
-		this.domElement = $(`
-			<div class="annotation" oncontextmenu="return false;">
-				<div class="annotation-titlebar">
-					<span class="annotation-label"></span>
-				</div>
-				<div class="annotation-description">
-					<span class="annotation-description-close">
-					<img src="${iconClose}" width="16px">
-					</span>
-					<span class="annotation-description-content">${this._description}</span>
-					<img src="${this._image}" id="DescImage" class="annotation-description-content-image">
-				</div>
-				<div class="annotation-adder">
-					<div>
-				 		<!-- <label for="imageInput"" class="annotation-adder-button"><span>Select Image</span></label> -->
-						<input id="imageInput" type="file" name="DescriptionImageInput" class="annotation-image-input" accept="image/png, image/jpeg, image/gif">
-					
-			</div>
-		`);
-
-		this.elTitlebar = this.domElement.find('.annotation-titlebar');
-		this.elTitle = this.elTitlebar.find('.annotation-label');
-		this.elTitle.append(this._title);
-		this.elDescription = this.domElement.find('.annotation-description');
-		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
-		this.elDescriptionImage = this.elDescription.find('.annotation-description-content-image');
-		// this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
-
-		this.elAdder = this.domElement.find('.annotation-adder');
-		this.elImageInput = this.elAdder.find('.annotation-image-input');
-
-		this.clickTitle = () => {
-			let camera = this.scene.getActiveCamera();
-			console.log(camera.quaternion);
-			/*
-			if(this.hasView()){
-				this.moveHere(this.scene.getActiveCamera());
-			}*/
-			this.dispatchEvent({type: 'click', target: this});
-			this.elDescriptionClose.css('opacity', '1');
-			if(this.descriptionVisible)
-				this.setHighlighted(false);
-			else
-				this.setHighlighted(true);
-		};
-
-		this.elTitle.click(this.clickTitle);
-
+		
 		this.actions = this.actions.map(a => {
 			if (a instanceof Action) {
 				return a;
@@ -109,65 +66,30 @@ export class Annotation extends EventDispatcher {
 			action.pairWith(this);
 		}
 
-		let actions = this.actions.filter(
-			a => a.showIn === undefined || a.showIn.includes('scene'));
-
-		for (let action of actions) {
-			let elButton = $(`<img src="${action.icon}" class="annotation-action-icon">`);
-			this.elTitlebar.append(elButton);
-			elButton.click(() => action.onclick({annotation: this}));
-		}
-
-		this.elDescriptionClose.hover(
-			e => this.elDescriptionClose.css('opacity', '1'),
-			e => this.elDescriptionClose.css('opacity', '0.5')
-		);
-		this.elDescriptionClose.click(e => this.setHighlighted(false));
-		// this.elDescriptionContent.html(this._description);
-
-		/*
-		this.domElement.mouseenter(e => this.setHighlighted(true));
-		this.domElement.mouseleave(e => this.setHighlighted(false));*/
-
-		this.domElement.on('touchstart', e => {
-			this.setHighlighted(!this.isHighlighted);
-		});
+		let actions = this.actions.filter(a => a.showIn === undefined 
+											|| a.showIn.includes('scene'));
 
 		this.display = false;
-		//this.display = true;
+		
+//------------------------------------------------------------------------
+		this.link = " "
 
-		// Handle Image Input
 		this.changeImage = (e) => {
-			//this.dispatchEvent({type: 'change', target: this});
-			console.log("change image")
 			var files = e.target.files;
-			var descImg = this.elDescriptionImage;
-
 			if(FileReader && files && files.length) {
 				var fr = new FileReader();
-				
 				var self = this;
 				fr.onload = function () {
-					//document.getElementById("DescImage").src = fr.result;
-					//console.log(typeof this.elDescriptionImage);
-					//console.log(this.elDescriptionImage.html);
-					self.elDescriptionImage.attr('src', fr.result);
-					
-					//this.elTitle = this.elContent.find("#annotation_title").html(annotation.title);
+					console.log(fr.result)
+					self.link = fr.result
 				}
 				fr.readAsDataURL(files[0]);
-				//this.elDescriptionImage.attr('src', fr.result);
 			} else {
-				// fallback -- perhaps submit the input to an iframe and temporarily store
-				// them on the server until the user's session ends.
 				console.log("FileReader error");
 			}
-			console.log(fr.result)
-
 			//this.elDescriptionImage.attr('src', '80');
 		};
-
-		this.elImageInput.change(this.changeImage);
+//--------------------------------------------------------------------------
 	}
 
 	installHandles(viewer){
@@ -232,12 +154,12 @@ export class Annotation extends EventDispatcher {
 			start: (event, ui) => {
 				annotationStartPos = this.position.clone();
 				annotationStartOffset = this.offset.clone();
-				$(this.domElement).find(".annotation-titlebar").css("pointer-events", "none");
+				$(this.domElement).find(".mesh-titlebar").css("pointer-events", "none");
 
-				console.log($(this.domElement).find(".annotation-titlebar"));
+				console.log($(this.domElement).find(".mesh-titlebar"));
 			},
 			stop: () => {
-				$(this.domElement).find(".annotation-titlebar").css("pointer-events", "");
+				$(this.domElement).find(".mesh-titlebar").css("pointer-events", "");
 			},
 			drag: (event, ui ) => {
 				let renderAreaWidth = viewer.renderer.getSize(new THREE.Vector2()).width;
@@ -314,134 +236,21 @@ export class Annotation extends EventDispatcher {
 		};
 	}
 
-	removeHandles(viewer){
-		if(this.handles === undefined){
-			return;
-		}
-
-		//$(viewer.renderArea).remove(this.handles.domElement);
-		this.handles.domElement.remove();
-		viewer.removeEventListener("update", this.handles.updateCallback);
-
-		delete this.handles;
-	}
-
-	get visible () {
-		return this._visible;
-	}
-
-	set visible (value) {
-		if (this._visible === value) {
-			return;
-		}
-
-		this._visible = value;
-
-		//this.traverse(node => {
-		//	node.display = value;
-		//});
-
-		this.dispatchEvent({
-			type: 'visibility_changed',
-			annotation: this
-		});
-	}
-
-	get display () {
-		return this._display;
-	}
-
-	set display (display) {
-		if (this._display === display) {
-			return;
-		}
-
-		this._display = display;
-
-		if (display) {
-			// this.domElement.fadeIn(200);
-			this.domElement.show();
-		} else {
-			// this.domElement.fadeOut(200);
-			this.domElement.hide();
-		}
-	}
-
-	get expand () {
-		return this._expand;
-	}
-
-	set expand (expand) {
-		if (this._expand === expand) {
-			return;
-		}
-
-		if (expand) {
-			this.display = false;
-		} else {
-			this.display = true;
-			this.traverseDescendants(node => {
-				node.display = false;
-			});
-		}
-
-		this._expand = expand;
-	}
-
-	get title () {
-		return this._title;
-	}
-
-	set title (title) {
-		if (this._title === title) {
-			return;
-		}
-
-		this._title = title;
-		this.elTitle.empty();
-		this.elTitle.append(this._title);
-
-		this.dispatchEvent({
-			type: "annotation_changed",
-			annotation: this,
-		});
-	}
-
-	get description () {
-		return this._description;
-	}
-
-	set description (description) {
-		if (this._description === description) {
-			return;
-		}
-
-		this._description = description;
-
-		const elDescriptionContent = this.elDescription.find(".annotation-description-content");
-		elDescriptionContent.empty();
-		elDescriptionContent.append(this._description);
-
-		this.dispatchEvent({
-			type: "annotation_changed",
-			annotation: this,
-		});
-	}
-
-	add (annotation) {
-		if (!this.children.includes(annotation)) {
-			this.children.push(annotation);
-			annotation.parent = this;
+	
+	add (mesh) {
+		if (!this.children.includes(mesh)) {
+			this.children.push(mesh);
+			mesh.parent = this;
 
 			let descendants = [];
-			annotation.traverse(a => { descendants.push(a); });
+			mesh.traverse(a => { descendants.push(a); });
 
 			for (let descendant of descendants) {
 				let c = this;
 				while (c !== null) {
 					c.dispatchEvent({
-						'type': 'annotation_added',
-						'annotation': descendant
+						'type': 'mesh_added',
+						'mesh': descendant
 					});
 					c = c.parent;
 				}
@@ -457,16 +266,16 @@ export class Annotation extends EventDispatcher {
 		}
 	}
 
-	hasChild(annotation) {
-		return this.children.includes(annotation);
+	hasChild(mesh) {
+		return this.children.includes(mesh);
 	}
 
-	remove (annotation) {
-		if (this.hasChild(annotation)) {
-			annotation.removeAllChildren();
-			annotation.dispose();
-			this.children = this.children.filter(e => e !== annotation);
-			annotation.parent = null;
+	remove (mesh) {
+		if (this.hasChild(mesh)) {
+			mesh.removeAllChildren();
+			mesh.dispose();
+			this.children = this.children.filter(e => e !== mesh);
+			mesh.parent = null;
 		}
 	}
 
@@ -534,31 +343,7 @@ export class Annotation extends EventDispatcher {
 		return annotations;
 	}
 
-	setHighlighted (highlighted) {
-		if (highlighted) {
-			this.domElement.css('opacity', '0.8');
-			this.elTitlebar.css('box-shadow', '0 0 5px #fff');
-			this.domElement.css('z-index', '1000');
-
-			if (this._description) {
-				this.descriptionVisible = true;
-				this.elDescription.fadeIn(200);
-				this.elDescription.css('position', 'relative');
-				this.elAdder.fadeIn(200);
-				this.elAdder.css('position', 'relative');
-			}
-		} else {
-			this.domElement.css('opacity', '0.5');
-			this.elTitlebar.css('box-shadow', '');
-			this.domElement.css('z-index', '100');
-			this.descriptionVisible = false;
-			this.elDescription.css('display', 'none');
-			this.elAdder.css('display', 'none');
-		}
-
-		this.isHighlighted = highlighted;
-	}
-
+	
 	hasView () {
 		let hasPosTargetView = this.cameraTarget.x != null;
 		hasPosTargetView = hasPosTargetView && this.cameraPosition.x != null;

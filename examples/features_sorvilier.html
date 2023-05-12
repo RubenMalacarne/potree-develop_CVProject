@@ -41,7 +41,8 @@
 		import * as THREE from "../libs/three.js/build/three.module.js";
 		import {PLYLoader} from "../libs/three.js/loaders/PLYLoader.js";
 		import {OBJLoader} from "../libs/three.js/loaders/OBJLoader.js";
-	
+		import {STLLoader} from "../libs/three.js/loaders/STLLoader.js";
+		
 		window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
 		
 		viewer.setEDLEnabled(true);
@@ -304,6 +305,35 @@
 
 			}, onProgress, onError );
 		}
+		//------------------------------------------------------------------------------------
+		// // load STL file: WAY 1
+		var loader = new STLLoader();
+		//con il click del mouse setto il path del file
+		loader.load( Potree.resourcePath + "/models/prova.stl",(geometry) => {
+			geometry.computeVertexNormals();	
+			
+		let mesh3;
+		{ 
+		let material1 = new THREE.MeshPhysicalMaterial( {
+					color: 0x664422,
+					metalness: 0,
+					roughness: 0.5,
+					clearCoat:  1.0,
+					clearCoatRoughness: 1.0,
+					reflectivity: 1.0
+				} );
+		// ritornare la posizione di dove lometto
+		mesh3 = new THREE.Mesh( geometry, material1 );
+		mesh3.position.set(589969.587, 231428.213, 710.634);
+		mesh3.scale.multiplyScalar(1);
+		mesh3.rotation.set(Math.PI / 2, Math.PI, 0)
+		viewer.scene.scene.add(mesh3);
+			}
+			
+
+		});
+		//------------------------------------------------------------------------------------
+
 		
 		// Load untextured bunny from ply
 		var loader = new PLYLoader();
@@ -316,7 +346,7 @@
 			{
 				let material = new THREE.MeshNormalMaterial();
 				mesh1 = new THREE.Mesh( geometry, material );
-				mesh1.position.set(589961.587, 231428.213, 710.634);
+				mesh1.position.set(58990069.587, 231428.213, 710.634);
 				mesh1.scale.multiplyScalar(500);
 				mesh1.rotation.set(Math.PI / 2, Math.PI, 0)
 				viewer.scene.scene.add(mesh1);
@@ -325,7 +355,7 @@
 			let mesh2;
 			{
 				let material = new THREE.MeshPhysicalMaterial( {
-					color: 0x226666,
+					color: 0x662244,
 					metalness: 0,
 					roughness: 0.5,
 					clearCoat:  1.0,
@@ -359,6 +389,14 @@
 					}, 
 					"last", false, false);
 				tree.jstree(mesh2.visible ? "check_node" : "uncheck_node", bunny2ID);
+
+				let provaID = tree.jstree('create_node', parentNode, { 
+						text: "prova", 
+						icon: `${Potree.resourcePath}/icons/triangle.svg`,
+						data: mesh3
+					}, 
+					"last", false, false);
+				tree.jstree(mesh3.visible ? "check_node" : "uncheck_node", provaID);
 			});
 			
 		});
