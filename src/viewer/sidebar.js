@@ -19,6 +19,8 @@ import {Images360} from "../modules/Images360/Images360.js";
 
 import JSON5 from "../../libs/json5-2.1.3/json5.mjs";
 
+import {STLLoader} from "../../libs/three.js/loaders/STLLoader.js";
+
 export class Sidebar{
 
 	constructor(viewer){
@@ -303,6 +305,7 @@ export class Sidebar{
 
 		{
 			let elExport = elScene.next().find("#scene_export");
+			let elImport = elScene.next().find("#scene_import");
 
 			let geoJSONIcon = `${Potree.resourcePath}/icons/file_geojson.svg`;
 			let dxfIcon = `${Potree.resourcePath}/icons/file_dxf.svg`;
@@ -314,6 +317,11 @@ export class Sidebar{
 				<a href="#" download="measure.dxf"><img name="dxf_export_button" src="${dxfIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="potree.json5"><img name="potree_export_button" src="${potreeIcon}" class="button-icon" style="height: 24px" /></a>
 				<a href="#" download="annotation.json"><img name="note_export_button" src="${geoJSONIcon}" class="button-icon" style="height: 24px" /></a>
+			`);
+
+			elImport.append(`
+				Import:<br>
+				<input id="stlInput" type="file" name="STLinput">
 			`);
 
 			let elDownloadJSON = elExport.find("img[name=geojson_export_button]").parent();
@@ -372,6 +380,41 @@ export class Sidebar{
 
 				let url = window.URL.createObjectURL(new Blob([dataString], {type: 'data:application/octet-stream'}));
 				elDownloadPotree.attr('href', url);
+			});
+
+			// Import selected model into the page
+			// IMPORTANT: file must be contained in /models/ folder!
+			let importSTL = elImport.find("input[name=STLinput]");
+			importSTL.change((e) => {
+				var files = e.target.files;
+				let filename = e.target.files[0].name;
+				if(FileReader && files && files.length) {
+					var fr = new FileReader();
+					
+					fr.onload = function () {
+						var loader = new STLLoader();
+						console.log(Potree.resourcePath + "/models/" + filename);
+						loader.load(Potree.resourcePath + "/models/" + filename,(geometry) => {
+							geometry.computeVertexNormals();	
+							
+						let mesh;
+						let material = new THREE.MeshPhysicalMaterial({
+											color: 0xFF9900,
+											metalness: 0,
+											roughness: 0.5,
+											reflectivity: 1.0
+										});
+						mesh = new THREE.Mesh(geometry, material);
+						mesh.position.set(-0.62, 1.1, 0.36);
+						mesh.scale.multiplyScalar(0.02);
+						mesh.rotation.set(Math.PI, Math.PI, 0)
+						viewer.scene.scene.add(mesh);
+						});
+					}
+					fr.readAsDataURL(files[0]);
+				} else {
+					console.log("FileReader error");
+				}
 			});
 		}
 
