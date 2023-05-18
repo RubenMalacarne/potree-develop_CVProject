@@ -139,30 +139,22 @@ export class Annotation extends EventDispatcher {
 
 		// Handle Image Input
 		this.changeImage = (e) => {
-			//this.dispatchEvent({type: 'change', target: this});
 			var files = e.target.files;
-			var descImg = this.elDescriptionImage;
+			this.src = e.target.files[0].name;
 
 			if(FileReader && files && files.length) {
 				var fr = new FileReader();
 				
 				var self = this;
 				fr.onload = function () {
-					//document.getElementById("DescImage").src = fr.result;
-					//console.log(typeof this.elDescriptionImage);
-					//console.log(this.elDescriptionImage.html);
 					self.elDescriptionImage.attr('src', fr.result);
-					//this.elTitle = this.elContent.find("#annotation_title").html(annotation.title);
 				}
 				fr.readAsDataURL(files[0]);
-				//this.elDescriptionImage.attr('src', fr.result);
 			} else {
 				// fallback -- perhaps submit the input to an iframe and temporarily store
 				// them on the server until the user's session ends.
 				console.log("FileReader error");
 			}
-
-			//this.elDescriptionImage.attr('src', '80');
 		};
 
 		this.elImageInput.change(this.changeImage);
