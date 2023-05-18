@@ -123,7 +123,7 @@ export class GeoJSONExporter{
 				properties: {
 					title: annotation[i].title,
 					description: annotation[i].description,
-					src: annotation[i].src
+					src: Potree.resourcePath + "/images/" + filenameannotation[i].src
 				}
 			};
 			features.push(feature);
