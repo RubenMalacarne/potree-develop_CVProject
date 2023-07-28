@@ -123,7 +123,7 @@ export class GeoJSONExporter{
 				properties: {
 					title: annotation[i].title,
 					description: annotation[i].description,
-					src: Potree.resourcePath + "/images/" + filenameannotation[i].src
+					src: Potree.resourcePath + "/images/" + annotation[i].src
 				}
 			};
 			features.push(feature);
@@ -134,7 +134,6 @@ export class GeoJSONExporter{
 			'quaternion': scene.getActiveCamera().quaternion.toArray(),
 			'features': features
 		};
-
 		return JSON.stringify(geojson, null, '\t');
 	}
 
