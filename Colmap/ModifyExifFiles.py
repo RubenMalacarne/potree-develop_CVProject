@@ -5,8 +5,19 @@ import numpy as np
 import os 
 import re
 
-# Function used to transform euler angles into quaternion
+#Function---------------------------------------------------------------------------------------------------
 def get_quaternion_from_euler(roll, pitch, yaw):
+  """
+  Convert an Euler angle to a quaternion.
+   
+  Input
+    :param roll: The roll (rotation around x-axis) angle in radians.
+    :param pitch: The pitch (rotation around y-axis) angle in radians.
+    :param yaw: The yaw (rotation around z-axis) angle in radians.
+ 
+  Output
+    :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+  """
   qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
   qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
   qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
@@ -14,36 +25,42 @@ def get_quaternion_from_euler(roll, pitch, yaw):
  
   return [qw, qx, qy, qz]
 
-# Count number of file
+
 def number_of_files(folder_path):
+    """
+    count the number of file in a folder path
+    """
     file_names = os.listdir(folder_path)
     tot_files = sum (1 for file_name in file_names if os.path.isfile(os.path.join(folder_path,file_name)))
     return tot_files
 
 
-# Function used to extract the gps values from the name string
+
 def extract_ALLdata_name(file_name):
-    # Defining the regex used to extract every single parameter from the filename
+    """
+    Save in a map/list the file name and split each value 
+    [name_file, (latitude, longitude, altitude, pitch, yaw, roll)] 
+    """
     pattern = r"lat(-?\d*\.\d+)_lon(-?\d*\.\d+)_alt(-?\d*\.\d+)_pitch(-?\d*\.\d+)_yaw(-?\d*\.\d+)_roll(-?\d*\.\d+)"
-    # Search for match in the filename
     match = re.search(pattern, file_name)
     if match:
-        # Extract all the values from the strinf using the regex
         value_lat   = float(match.group(1))
         value_lon   = float(match.group(2))
         value_alt   = float(match.group(3))
         value_pitch = float(match.group(4))
         value_yaw   = float(match.group(5))
         value_roll  = float(match.group(6))
-
-        # Create list containing the single values
+        # list of separate value
         list_values = (value_lat, value_lon, value_alt, value_pitch, value_yaw, value_roll)
         return list_values
     else:
         raise ValueError("no numeric value.")
+    
 
-#Function to convert the coordinate
 def dec_to_dms(dec):
+    """
+    Function to convert the coordinate
+    """
     degree = np.floor(dec)
     minutes = dec % 1.0 * 60
     seconds = minutes % 1.0 * 60
@@ -51,8 +68,10 @@ def dec_to_dms(dec):
     return (degree, minutes, seconds)
 
 
-#Function to save the cordinate in Exif image
 def add_coords(path_image, coordinates):
+    """
+    Function to save coordinate GPS into EXIF image
+    """
     img = Image.open(path_image)
     #load metadata
     exif_dict = piexif.load(img.info['exif'])
@@ -74,30 +93,31 @@ def add_coords(path_image, coordinates):
     exif_bytes = piexif.dump(exif_dict)
     img.save(path_image, exif=exif_bytes)
 
-    # # User comment for Pitch, Yaw, roll
-    # custom_info = {
-    #     "Pitch": pitch,
-    #     "Yaw": yaw,
-    #     "Roll": roll
-    # }
-    # exif_dict["Exif"][piexif.ExifIFD.UserComment] = json.dumps(custom_info)
 
-#Progress Bar
 def progress(percent=0, width=30):
+    """
+    progress BAR
+    """
     left = width * percent // 100
     right = width - left
     print('\r[', '#' * left, ' ' * right, ']',
           f' {percent: .0f}%', sep='', end='', flush=True)
+    
+   
+#Variables--------------------------------------------------------------------------------------------------
 
 # path folder dataset                                          
-path_folder = "PATH"        # IMPORTANT! Modify the path to the fodler containing the images
-# List of [filename, GPS coords]
+#path_folder = "Datasetcanale"     # <<<<--- MODIFY HERE and add the path of the folder of your dataset
+path_folder = "Datasetstrada"     # <<<<--- MODIFY HERE and add the path of the folder of your dataset
+#list_image is a list with name and data pair {name, [GPS data]}
 list_image = []
 count = 0
 
+#MAIN-------------------------------------------------------------------------------------------------------
 try:     
-    path_current_image = ""
     file_names = os.listdir(path_folder)
+    
+    print ("\n\n point 1: Get Quaternion from Euler")
     for  file_name in file_names:
         if file_name.lower().endswith('.jpeg'):
             value_gps = extract_ALLdata_name(file_name)
@@ -109,25 +129,31 @@ try:
             print(quat[0],",", quat[1], ", ",  quat[2], ", ", quat[3])
 
             list_image.append([file_name,value_gps])
+            #print (file_name)
 
+
+    print ("\n\n point 2: list of image and associated values")
     if list_image:
         for image in list_image:
             print(image)
     else:
-        print("Nessun valore di latitudine e longitudine trovato nel nome del file.")
+        print("ERROR_1: NO value of latitude and longitude found in file name.")
 
-    print ("\n\n Image or Exif_file editing Processs")
+    print ("\n\n Exif_file editing Processs:")
+    print ("\nTotal of image to process: ", number_of_files(path_folder))
     for image in list_image:
         count+=1
         progress(count)
         path_current_image = path_folder + "/" + image[0]
         add_coords(path_current_image,image[1])
-        
+#other possible error      
 except FileNotFoundError: 
-    print (f"the folder '{path_folder}' doesn't exist")
+    print (f"ERROR_2: the folder '{path_folder}' doesn't exist")
 except PermissionError: 
-    print (f"you can not to open folder'{path_folder}'")
+    print (f"ERROR_3: you can not to open folder'{path_folder}'")
 except Exception as e: 
-    print (f"there is an error: {e}")
+    print (f"ERROR_4: there is an error: {e}")
     
 print (f"\n\n\nPerfect the implementation is DONE! + image change:  {count}\n\n\n")
+
+   
