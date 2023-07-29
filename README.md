@@ -24,10 +24,9 @@ npm update
 npm start
 ```
 ## To use the Colmap, before download colmap:
-![CV Progect](images/logo_uni.jpg)
 ```bash
 node https://colmap.github.io/install.html
 ```
 
 GOOD LUCK and Enjoy the project ;)
-
+![CV Progect](images/logo_uni.jpg)
