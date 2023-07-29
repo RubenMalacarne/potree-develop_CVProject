@@ -10,20 +10,20 @@
     - Python script to compute the scale factor between image with GPS coordinate and without (in folder Colmap)
 
 
-* To use the potree file following this step:
-## 1. Remember to install the packages of node.js inside the POTREE folder
+## To use the potree file following this step:
+### 1. Remember to install the packages of node.js inside the POTREE folder
 ```bash
 npm install
 ```
-## 2. update the package
+### 2. update the package
 ```bash
 npm update
 ```
-## 3. Run on your PC using this code
+### 3. Run on your PC using this code
 ```bash
 npm start
 ```
-* To use the Colmap, before download colmap:
+## To use the Colmap, before download colmap:
 
 ```bash
 node https://colmap.github.io/install.html
