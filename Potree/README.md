@@ -20,4 +20,4 @@ npm update
 ```bash
 npm start
 ```
-Go to [*http://localhost:1234/examples/ to test the examples.] to see the Point cloud image
+Go to [*http://localhost:1234/examples/] to see the Point cloud image
