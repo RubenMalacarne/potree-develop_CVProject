@@ -1,6 +1,6 @@
 
 # Computer Vision Project: Adding Holograms information in a Virtual environment
-![CV Progect](images/logo_uni.jpg)
+
 * In this Repository you can find the project of the Computer vision that we have implemented during the Course
     
     You can see the following files:
@@ -24,7 +24,7 @@ npm update
 npm start
 ```
 ## To use the Colmap, before download colmap:
-
+![CV Progect](images/logo_uni.jpg)
 ```bash
 node https://colmap.github.io/install.html
 ```
