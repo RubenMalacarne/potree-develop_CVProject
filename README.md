@@ -32,6 +32,10 @@ If you want to use the "contatore" model, you need to copy the file "octree.bin"
 ```bash
 node https://colmap.github.io/install.html
 ```
+## LINK cartella Drive
+```bash
+[node https://colmap.github.io/install.html](https://drive.google.com/drive/folders/1WZzmiA6ENdciClsUQAceOtXoeA8wS4z_?usp=sharing)https://drive.google.com/drive/folders/1WZzmiA6ENdciClsUQAceOtXoeA8wS4z_?usp=sharing
+```
 
 GOOD LUCK and Enjoy the project ;)
 ![CV Progect](images/logo_uni.jpg)
